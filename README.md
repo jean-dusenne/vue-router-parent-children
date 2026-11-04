@@ -41,6 +41,18 @@ npm run dev
 npm run build
 ```
 
+### Build and Serve a Single Module or the Whole App
+
+Each mode is built into its own folder, so the builds can coexist. Build first, then serve; the serve scripts never rebuild.
+
+| Mode | Build | Serve | Output |
+| --- | --- | --- | --- |
+| Whole app (`/stock`, `/refill`) | `npm run build` | `npm run serve` | `dist/default` |
+| Refill only (at `/`) | `npm run build:refill` | `npm run serve:refill` | `dist/refill` |
+| Stock only (at `/`) | `npm run build:stock` | `npm run serve:stock` | `dist/stock` |
+
+A serve script fails with a message if the build of its mode is missing. `npm run preview` is an alias of `npm run serve`.
+
 ### Run Unit Tests with [Vitest](https://vitest.dev/)
 
 ```sh

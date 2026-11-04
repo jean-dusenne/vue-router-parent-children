@@ -131,15 +131,18 @@ describe('App', () => {
     wrapper.unmount()
   })
 
-  it('hides the stock ID error while a valid stock detail remains active', async () => {
+  it('shows the stock ID error in the stock layout while a valid stock detail remains active', async () => {
     await router.push('/stock/42')
     const wrapper = mount(App, { global: { plugins: [router] } })
 
     await expect(router.push('/stock/404')).rejects.toThrow('Stock ID 404 not found')
     await flushPromises()
 
+    // to be clear, the stock ID error is shown in the stock layout while the valid stock detail remains active
+    // poc issue
     expect(router.currentRoute.value.path).toBe('/stock/42')
-    expect(wrapper.find('[role="alert"]').exists()).toBe(false)
+    expect(wrapper.get('.stock-layout [role="alert"]').text()).toBe('Stock ID 404 not found')
+    expect(wrapper.find('.app-shell > [role="alert"]').exists()).toBe(false)
     wrapper.unmount()
   })
 })

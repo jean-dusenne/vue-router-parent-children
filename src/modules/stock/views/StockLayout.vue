@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { RouterLink, RouterView, useRoute } from 'vue-router'
+import { RouterLink, RouterView } from 'vue-router'
 import { useNavigationError } from '@/shared/composables/useNavigationError'
 
-const route = useRoute()
 const { navigationError } = useNavigationError()
 </script>
 
@@ -16,7 +15,7 @@ const { navigationError } = useNavigationError()
         <RouterLink :to="{ name: 'stock-details', params: { id: 404 } }">Stock 404 (error)</RouterLink>
       </nav>
     </header>
-    <p v-if="navigationError && route.meta.title !== 'Stock details'" class="navigation-error" role="alert">
+    <p v-if="navigationError" class="navigation-error" role="alert">
       {{ navigationError }}
     </p>
     <div class="stock-content">
