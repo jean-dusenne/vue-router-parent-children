@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { onBeforeUnmount, ref } from 'vue'
-import { RouterLink, RouterView, useRoute } from 'vue-router'
-import router from '../router'
+import { RouterLink, RouterView, useRouter, isNavigationFailure, NavigationFailureType } from 'vue-router'
 
-const route = useRoute()
+const router = useRouter()
 const navigationError = ref('')
 const removeErrorListener = router.onError((error) => {
   navigationError.value = error instanceof Error ? error.message : String(error)
 })
 const removeAfterEachHook = router.afterEach((_to, _from, failure) => {
-  if (!failure) navigationError.value = ''
+  // Clicking the active link is a duplicated navigation: the user is on a valid page, so clear the error.
+  if (!failure || isNavigationFailure(failure, NavigationFailureType.duplicated)) navigationError.value = ''
 })
 
 onBeforeUnmount(() => {
@@ -28,7 +28,7 @@ onBeforeUnmount(() => {
         <RouterLink to="/stock/404">Stock 404 (error)</RouterLink>
       </nav>
     </header>
-    <p v-if="navigationError && route.meta.title !== 'Stock details'" class="navigation-error" role="alert">
+    <p v-if="navigationError" class="navigation-error" role="alert">
       {{ navigationError }}
     </p>
     <div class="stock-content">

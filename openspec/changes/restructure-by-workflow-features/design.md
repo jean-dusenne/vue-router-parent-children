@@ -72,7 +72,7 @@ Route definitions live in `<feature>-routes.ts` (domain-named, per the skill) an
 ### Lint boundaries
 `no-restricted-imports` overrides in `eslint.config.ts`, with a `workflows` list constant. Each file matches exactly one override, because a later override replaces an earlier one for the same rule instead of merging.
 - Files outside `src/workflows/**` (app, main, tests): block any import that goes below a workflow root (`@/workflows/*/**`, `**/workflows/*/**`); only `@/workflows/<w>` is allowed.
-- Files in `src/workflows/<w>/**` (one override per workflow): block `@/app`, `@/app/**`, `**/app/**`; block `@/workflows/<other>/**` deep imports for every other workflow; allow `@/workflows/<other>` itself.
+- Files in `src/workflows/<w>/**` (one override per workflow): block `@/app`, `@/app/**`, `**/app`, `**/app/**`; block deep imports into every other workflow, both aliased (`@/workflows/<other>/**`, `**/workflows/<other>/**`) and relative (`../**/<other>/**`); allow `@/workflows/<other>` itself. The relative pattern would also reject an own segment named like another workflow reached through `../` (e.g. a refill feature called `stock`); rename such a segment or adjust the pattern if that arises.
 - Within a workflow, own files are imported relatively, as the skill requires.
 
 Limits of the approach: relative imports cannot be classified by pattern, so a deep relative import from one feature into a sibling feature is not caught by lint. Mitigation: code review plus the manual cycle check below. `eslint-plugin-boundaries` would close the gap but adds a dependency; revisit when a third workflow appears.

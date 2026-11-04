@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onBeforeRouteUpdate } from 'vue-router'
-import { assertStockIdAllowed } from '../router/stock-id-guard'
+import { assertStockIdAllowed } from '../model/stock-id-guard'
 
 defineProps<{ id: string }>()
 
