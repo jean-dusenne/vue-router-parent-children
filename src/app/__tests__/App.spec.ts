@@ -131,11 +131,27 @@ describe('App', () => {
     wrapper.unmount()
   })
 
-  it('hides the stock ID error while a valid stock detail remains active', async () => {
+  it('shows the stock ID error while a valid stock detail remains active', async () => {
     await router.push('/stock/42')
     const wrapper = mount(App, { global: { plugins: [router] } })
 
     await expect(router.push('/stock/404')).rejects.toThrow('Stock ID 404 not found')
+    await flushPromises()
+
+    expect(router.currentRoute.value.path).toBe('/stock/42')
+    expect(wrapper.get('.stock-layout [role="alert"]').text()).toBe('Stock ID 404 not found')
+    wrapper.unmount()
+  })
+
+  it('clears the stock ID error when clicking the link of the stock detail already active', async () => {
+    await router.push('/stock/42')
+    const wrapper = mount(App, { global: { plugins: [router] } })
+
+    await expect(router.push('/stock/404')).rejects.toThrow('Stock ID 404 not found')
+    await flushPromises()
+    expect(wrapper.find('.stock-layout [role="alert"]').exists()).toBe(true)
+
+    await wrapper.get('a[href="/stock/42"]').trigger('click')
     await flushPromises()
 
     expect(router.currentRoute.value.path).toBe('/stock/42')
