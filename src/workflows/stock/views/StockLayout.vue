@@ -1,21 +1,9 @@
 <script setup lang="ts">
-import { onBeforeUnmount, ref } from 'vue'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
-import router from '../router'
+import { useNavigationError } from '@/shared/composables/useNavigationError'
 
 const route = useRoute()
-const navigationError = ref('')
-const removeErrorListener = router.onError((error) => {
-  navigationError.value = error instanceof Error ? error.message : String(error)
-})
-const removeAfterEachHook = router.afterEach((_to, _from, failure) => {
-  if (!failure) navigationError.value = ''
-})
-
-onBeforeUnmount(() => {
-  removeErrorListener()
-  removeAfterEachHook()
-})
+const { navigationError } = useNavigationError()
 </script>
 
 <template>

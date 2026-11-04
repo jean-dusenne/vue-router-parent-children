@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 
 import { flushPromises, mount } from '@vue/test-utils'
 import App from '../App.vue'
@@ -141,5 +141,21 @@ describe('App', () => {
     expect(router.currentRoute.value.path).toBe('/stock/42')
     expect(wrapper.find('[role="alert"]').exists()).toBe(false)
     wrapper.unmount()
+  })
+})
+
+describe('App direct load of an invalid stock id', () => {
+  it('shows the stock ID error when /stock/404 is loaded directly', async () => {
+    vi.resetModules()
+    window.history.replaceState({}, '', '/stock/404')
+    const { default: FreshApp } = await import('../App.vue')
+    const { default: freshRouter } = await import('../router')
+
+    const wrapper = mount(FreshApp, { global: { plugins: [freshRouter] } })
+    await flushPromises()
+
+    expect(wrapper.get('[role="alert"]').text()).toBe('Stock ID 404 not found')
+    wrapper.unmount()
+    window.history.replaceState({}, '', '/')
   })
 })

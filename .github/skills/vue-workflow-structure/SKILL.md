@@ -5,9 +5,9 @@ description: Organise Vue code by workflow (stock, refill, and any future workfl
 
 # Vue workflow structure
 
-Code is grouped by **workflow** (a business flow with its own pages and routes). `stock` and `refill` are the current workflows; the list is not exhaustive and new workflows follow the same structure. Inside a workflow, the classic Vue folders are used. Code used by several workflows lives in `shared/`.
+Code is grouped by **workflow** (a business flow with its own pages and routes). `stock` and `refill` are the current workflows; the list is not exhaustive and new workflows follow the same structure. Inside a workflow, the classic Vue folders are used. Code used by several workflows, or by a workflow and the app shell, lives in `shared/`.
 
-Existing code (`src/views`, `src/router/stock-id-guard.ts`, ...) is migrated to this structure by a later change. Apply the structure to all **new code** and to code you are **touching**; do not move unrelated files.
+The stock and refill code already follows this structure. Apply it to all **new code** and to code you are **touching**. `src/stores/counter.ts` is demo code tied to no workflow and is the only code left outside it.
 
 ## Target structure
 
@@ -23,7 +23,7 @@ src/
     refill/
       components/  composables/  stores/  views/  router/
     <new-workflow>/    same structure
-  shared/              used by 2+ workflows
+  shared/              used by 2+ workflows, or a workflow and the app shell
     components/  composables/  stores/
   router/index.ts      creates the router, aggregates workflow routes
   App.vue
@@ -41,7 +41,7 @@ Create a folder only when it contains something. A workflow without state has no
 | `use*` function (reactive logic, router hooks) | `workflows/<workflow>/composables/` |
 | Pinia store | `workflows/<workflow>/stores/` |
 | Routes and route guards of the workflow | `workflows/<workflow>/router/` |
-| Any of the above used by 2+ workflows | `shared/components`, `shared/composables`, `shared/stores` |
+| Any of the above used by 2+ workflows, or by a workflow and the app shell | `shared/components`, `shared/composables`, `shared/stores` |
 | Router creation, app-level routes (`/`) | `src/router/index.ts` |
 
 ## Dependency rules
@@ -58,7 +58,7 @@ shared -x->  any workflow  (shared never depends on a workflow)
 
 ## Promotion to shared
 
-Keep code in its workflow until a **second workflow actually needs it**. Do not put something in `shared/` because it looks generic.
+Keep code in its workflow until a **second consumer actually needs it**: another workflow, or the app shell (`App.vue`, `src/router`). Do not put something in `shared/` because it looks generic.
 
 When refill needs something that lives in stock:
 1. Move it from `workflows/stock/<folder>/` to `shared/<folder>/`.
@@ -69,7 +69,7 @@ Never import from `@/workflows/stock/...` inside refill.
 
 ## Routes
 
-Each workflow exports its routes and guards from `workflows/<workflow>/router/`. The app router only aggregates them.
+Each workflow exports its routes and guards from `workflows/<workflow>/router/`. The app router aggregates them and may define only app-level routes that belong to no workflow, such as `/`.
 
 ```ts
 // src/workflows/stock/router/routes.ts
@@ -120,11 +120,9 @@ Adding a route to a workflow means editing that workflow's routes only.
 - Within the same workflow: use relative paths, so the workflow can be moved as a unit.
 - No barrel `index.ts` per workflow for now.
 
-## Examples from this repo (target state)
+## Examples from this repo
 
-Current paths below exist today; the destination is the target.
-
-- `src/router/stock-id-guard.ts` (`assertStockIdAllowed`) is stock-only. It moves to `src/workflows/stock/router/stock-id-guard.ts`, next to the stock routes. `StockDetails.vue`, which also uses it, imports it relatively.
-- `src/views/StockLayout.vue` contains navigation-error logic (`router.onError` + `afterEach`). Extract it as `useNavigationError` in `src/workflows/stock/composables/`. `src/views/RefillLayout.vue` does not use it, so it stays in stock. If refill later needs it, promote it to `src/shared/composables/useNavigationError.ts`.
-- `src/views/Stock*.vue` go to `src/workflows/stock/views/`, `src/views/Refill*.vue` to `src/workflows/refill/views/`.
+- `src/workflows/stock/router/stock-id-guard.ts` (`assertStockIdAllowed`) is stock-only, so it sits next to `src/workflows/stock/router/routes.ts`. `StockDetails.vue`, which also uses it, imports it relatively (`../router/stock-id-guard`).
+- `src/shared/composables/useNavigationError.ts` records navigation errors (`router.onError` + `afterEach`). It lives in `shared/` because two consumers need it: `StockLayout.vue` (stock workflow) and `App.vue` (app shell, which shows the error when a direct load of `/stock/404` fails before any layout is mounted). It started in stock and was promoted when `App.vue` needed it.
+- `src/workflows/stock/views/` holds `Stock*.vue`, `src/workflows/refill/views/` holds `Refill*.vue`; their routes are `stockRoutes` and `refillRoutes`, aggregated by `src/router/index.ts`.
 - `src/stores/counter.ts` is demo code tied to no workflow. Leave it, or move it to `shared/stores/` only if two workflows use it.
