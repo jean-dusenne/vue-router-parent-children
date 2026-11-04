@@ -1,1 +1,1 @@
-export { stockRoutes } from './router/routes'
+export { createStockRoutes } from './router/routes'

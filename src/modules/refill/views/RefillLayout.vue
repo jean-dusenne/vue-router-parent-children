@@ -8,8 +8,8 @@ import { RouterLink, RouterView } from 'vue-router'
       <p class="sidebar-label">Refill</p>
       <h2>Workspace</h2>
       <nav aria-label="Refill child routes">
-        <RouterLink to="/refill">Overview</RouterLink>
-        <RouterLink to="/refill/42/settings">Refill 42 settings</RouterLink>
+        <RouterLink :to="{ name: 'refill-overview' }">Overview</RouterLink>
+        <RouterLink :to="{ name: 'refill-settings', params: { id: 42 } }">Refill 42 settings</RouterLink>
       </nav>
     </aside>
     <section class="refill-content">

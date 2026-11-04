@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
 import { useTitle } from '@vueuse/core'
+import { appModule } from '@/router'
 import { useNavigationError } from '@/shared/composables/useNavigationError'
 
 const route = useRoute()
@@ -22,7 +23,7 @@ useTitle(computed(() => {
         <p class="eyebrow">Vue Router</p>
         <h1>Parent and child routes</h1>
       </div>
-      <nav aria-label="Route families">
+      <nav v-if="!appModule" aria-label="Route families">
         <RouterLink class="primary-link" to="/stock">Stock</RouterLink>
         <RouterLink class="primary-link" to="/refill">Refill</RouterLink>
       </nav>

@@ -11,9 +11,9 @@ const { navigationError } = useNavigationError()
     <header class="stock-header">
       <h2>Stock</h2>
       <nav aria-label="Stock child routes">
-        <RouterLink to="/stock">Directory</RouterLink>
-        <RouterLink to="/stock/42">Stock 42</RouterLink>
-        <RouterLink to="/stock/404">Stock 404 (error)</RouterLink>
+        <RouterLink :to="{ name: 'stock-directory' }">Directory</RouterLink>
+        <RouterLink :to="{ name: 'stock-details', params: { id: 42 } }">Stock 42</RouterLink>
+        <RouterLink :to="{ name: 'stock-details', params: { id: 404 } }">Stock 404 (error)</RouterLink>
       </nav>
     </header>
     <p v-if="navigationError && route.meta.title !== 'Stock details'" class="navigation-error" role="alert">
