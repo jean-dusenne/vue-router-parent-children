@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { stockRoutes } from '@/workflows/stock/router/routes'
-import { refillRoutes } from '@/workflows/refill/router/routes'
+import { stockRoutes } from '@/modules/stock'
+import { refillRoutes } from '@/modules/refill'
 
 const EmptyRoute = { render: () => null }
 
