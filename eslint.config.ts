@@ -1,3 +1,6 @@
+import { readdirSync } from 'node:fs'
+
+import type { Linter } from 'eslint'
 import { globalIgnores } from 'eslint/config'
 import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript'
 import pluginVue from 'eslint-plugin-vue'
@@ -9,6 +12,25 @@ import skipFormatting from 'eslint-config-prettier/flat'
 // import { configureVueProject } from '@vue/eslint-config-typescript'
 // configureVueProject({ scriptLangs: ['ts', 'tsx'] })
 // More info at https://github.com/vuejs/eslint-config-typescript/#advanced-setup
+
+const modules = readdirSync('src/modules', { withFileTypes: true })
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => entry.name)
+
+// Modules never import one another, and shared never imports a module.
+function restrictModules(blocked: string[], message: string): Linter.RulesRecord {
+  return {
+    'no-restricted-imports': [
+      'error',
+      {
+        patterns: blocked.map((name) => ({
+          group: [`@/modules/${name}`, `@/modules/${name}/**`, `../**/${name}`, `../**/${name}/**`],
+          message,
+        })),
+      },
+    ],
+  }
+}
 
 export default defineConfigWithVueTs(
   {
@@ -27,6 +49,21 @@ export default defineConfigWithVueTs(
   },
 
   ...pluginOxlint.buildFromOxlintConfigFile('.oxlintrc.json'),
+
+  ...modules.map((name) => ({
+    name: `app/module-boundaries/${name}`,
+    files: [`src/modules/${name}/**/*.{vue,ts,mts,tsx}`],
+    rules: restrictModules(
+      modules.filter((other) => other !== name),
+      'A module must not import another module. Move shared code to src/shared.',
+    ),
+  })),
+
+  {
+    name: 'app/module-boundaries/shared',
+    files: ['src/shared/**/*.{vue,ts,mts,tsx}'],
+    rules: restrictModules(modules, 'src/shared must not depend on a module.'),
+  },
 
   skipFormatting,
 )
