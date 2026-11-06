@@ -23,7 +23,9 @@
     "format": "prettier --write --experimental-cli src/"
   },
   "dependencies": {
+    "@fastify/static": "^10.1.10",
     "@vueuse/core": "^15.0.0",
+    "fastify": "^5.12.8",
     "pinia": "^4.0.3",
     "vue": "^3.5.42",
     "vue-router": "^5.3.1"
