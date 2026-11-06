@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 
 import { flushPromises, mount } from '@vue/test-utils'
 import App from '../App.vue'
@@ -131,15 +131,34 @@ describe('App', () => {
     wrapper.unmount()
   })
 
-  it('hides the stock ID error while a valid stock detail remains active', async () => {
+  it('shows the stock ID error in the stock layout while a valid stock detail remains active', async () => {
     await router.push('/stock/42')
     const wrapper = mount(App, { global: { plugins: [router] } })
 
     await expect(router.push('/stock/404')).rejects.toThrow('Stock ID 404 not found')
     await flushPromises()
 
+    // to be clear, the stock ID error is shown in the stock layout while the valid stock detail remains active
+    // poc issue
     expect(router.currentRoute.value.path).toBe('/stock/42')
-    expect(wrapper.find('[role="alert"]').exists()).toBe(false)
+    expect(wrapper.get('.stock-layout [role="alert"]').text()).toBe('Stock ID 404 not found')
+    expect(wrapper.find('.app-shell > [role="alert"]').exists()).toBe(false)
     wrapper.unmount()
+  })
+})
+
+describe('App direct load of an invalid stock id', () => {
+  it('shows the stock ID error when /stock/404 is loaded directly', async () => {
+    vi.resetModules()
+    window.history.replaceState({}, '', '/stock/404')
+    const { default: FreshApp } = await import('../App.vue')
+    const { default: freshRouter } = await import('../router')
+
+    const wrapper = mount(FreshApp, { global: { plugins: [freshRouter] } })
+    await flushPromises()
+
+    expect(wrapper.get('[role="alert"]').text()).toBe('Stock ID 404 not found')
+    wrapper.unmount()
+    window.history.replaceState({}, '', '/')
   })
 })

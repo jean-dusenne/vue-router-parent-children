@@ -1,52 +1,27 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { assertStockIdAllowed } from './stock-id-guard'
+import { createStockRoutes } from '@/modules/stock'
+import { createRefillRoutes } from '@/modules/refill'
 
 const EmptyRoute = { render: () => null }
 
+// VITE_APP_MODULE=refill|stock mounts a single module at "/" (no prefix in the URL)
+export const appModule = import.meta.env.VITE_APP_MODULE
+
+function buildRoutes() {
+  if (appModule === 'refill') return createRefillRoutes('')
+  if (appModule === 'stock') return createStockRoutes('')
+  return [
+    { path: '/', component: EmptyRoute, meta: { title: 'Vue Router POC' } },
+    ...createStockRoutes(),
+    ...createRefillRoutes(),
+  ]
+}
+
+const routes = buildRoutes()
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    {
-      path: '/',
-      component: EmptyRoute,
-      meta: { title: 'Vue Router POC' }
-    },
-    {
-      path: '/stock',
-      component: () => import('../views/StockLayout.vue'),
-      children: [
-        {
-          path: '',
-          component: () => import('../views/StockDirectory.vue'),
-          meta: { title: 'Stock' },
-        },
-        {
-          path: ':id',
-          components: { default: () => import('../views/StockDetails.vue') },
-          props: { default: true },
-          beforeEnter: (to) => assertStockIdAllowed(to.params.id),
-          meta: { title: 'Stock details' },
-        },
-      ],
-    },
-    {
-      path: '/refill',
-      component: () => import('../views/RefillLayout.vue'),
-      children: [
-        {
-          path: '',
-          component: () => import('../views/RefillOverview.vue'),
-          meta: { title: 'Refill' },
-        },
-        {
-          path: ':id/settings',
-          components: { default: () => import('../views/RefillSettings.vue') },
-          props: { default: true },
-          meta: { title: 'Refill settings' },
-        },
-      ],
-    },
-  ],
+  routes,
 })
 
 

@@ -1,21 +1,8 @@
 <script setup lang="ts">
-import { onBeforeUnmount, ref } from 'vue'
-import { RouterLink, RouterView, useRoute } from 'vue-router'
-import router from '../router'
+import { RouterLink, RouterView } from 'vue-router'
+import { useNavigationError } from '@/shared/composables/useNavigationError'
 
-const route = useRoute()
-const navigationError = ref('')
-const removeErrorListener = router.onError((error) => {
-  navigationError.value = error instanceof Error ? error.message : String(error)
-})
-const removeAfterEachHook = router.afterEach((_to, _from, failure) => {
-  if (!failure) navigationError.value = ''
-})
-
-onBeforeUnmount(() => {
-  removeErrorListener()
-  removeAfterEachHook()
-})
+const { navigationError } = useNavigationError()
 </script>
 
 <template>
@@ -23,12 +10,12 @@ onBeforeUnmount(() => {
     <header class="stock-header">
       <h2>Stock</h2>
       <nav aria-label="Stock child routes">
-        <RouterLink to="/stock">Directory</RouterLink>
-        <RouterLink to="/stock/42">Stock 42</RouterLink>
-        <RouterLink to="/stock/404">Stock 404 (error)</RouterLink>
+        <RouterLink :to="{ name: 'stock-directory' }">Directory</RouterLink>
+        <RouterLink :to="{ name: 'stock-details', params: { id: 42 } }">Stock 42</RouterLink>
+        <RouterLink :to="{ name: 'stock-details', params: { id: 404 } }">Stock 404 (error)</RouterLink>
       </nav>
     </header>
-    <p v-if="navigationError && route.meta.title !== 'Stock details'" class="navigation-error" role="alert">
+    <p v-if="navigationError" class="navigation-error" role="alert">
       {{ navigationError }}
     </p>
     <div class="stock-content">

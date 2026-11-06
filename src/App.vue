@@ -2,8 +2,11 @@
 import { computed } from 'vue'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
 import { useTitle } from '@vueuse/core'
+import { appModule } from '@/router'
+import { useNavigationError } from '@/shared/composables/useNavigationError'
 
 const route = useRoute()
+const { navigationError } = useNavigationError()
 useTitle(computed(() => {
   const baseTitle = typeof route.meta.title === 'string' ? route.meta.title : 'Vue Router POC'
   const routeId = route.params.id
@@ -20,13 +23,16 @@ useTitle(computed(() => {
         <p class="eyebrow">Vue Router</p>
         <h1>Parent and child routes</h1>
       </div>
-      <nav aria-label="Route families">
+      <nav v-if="!appModule" aria-label="Route families">
         <RouterLink class="primary-link" to="/stock">Stock</RouterLink>
         <RouterLink class="primary-link" to="/refill">Refill</RouterLink>
       </nav>
     </header>
 
     <main>
+      <p v-if="navigationError && !route.matched.length" class="app-navigation-error" role="alert">
+        {{ navigationError }}
+      </p>
       <RouterView />
     </main>
   </div>
@@ -111,6 +117,14 @@ nav {
 
 main {
   padding-top: 28px;
+}
+
+.app-navigation-error {
+  margin: 0;
+  padding: 12px 16px;
+  border-left: 4px solid #b6473b;
+  color: #732b25;
+  background: #fff0ed;
 }
 
 .route-page {
