@@ -1,0 +1,12 @@
+{
+  "folders": [{ "path": "." }],
+  "settings": {
+    "window.title": "stock — ${folderName}${separator}${activeEditorShort}",
+    "files.exclude": {
+      "src/modules/refill": true
+    },
+    "search.exclude": {
+      "src/modules/refill": true
+    }
+  }
+}

@@ -6,6 +6,15 @@ This template should help get you started developing with Vue 3 in Vite.
 
 [VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
 
+### Module workspaces
+
+Open one module at a time (`File > Open Workspace from File...`):
+
+- `refill.code-workspace`: refill, `src/shared` and the app config; `src/modules/stock` is hidden.
+- `stock.code-workspace`: stock, `src/shared` and the app config; `src/modules/refill` is hidden.
+
+The modules are only hidden from the explorer, Quick Open and search. TypeScript still checks the whole project.
+
 ## Recommended Browser Setup
 
 - Chromium-based browsers (Chrome, Edge, Brave, etc.):
