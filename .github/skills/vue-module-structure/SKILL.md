@@ -78,17 +78,30 @@ Each module owns its route definitions and guards under `modules/<module>/router
 
 ```ts
 // src/modules/stock/index.ts
-export { stockRoutes } from './router/routes'
+export { createStockRoutes } from './router/routes'
 ```
 
 ```ts
 // src/router/index.ts
-import { stockRoutes } from '@/modules/stock'
-import { refillRoutes } from '@/modules/refill'
+import { createStockRoutes } from '@/modules/stock'
+import { createRefillRoutes } from '@/modules/refill'
+
+// VITE_APP_MODULE=refill|stock mounts a single module at "/" (no prefix in the URL)
+export const appModule = import.meta.env.VITE_APP_MODULE
+
+function buildRoutes() {
+  if (appModule === 'refill') return createRefillRoutes('')
+  if (appModule === 'stock') return createStockRoutes('')
+  return [
+    { path: '/', component: EmptyRoute, meta: { title: 'Vue Router POC' } },
+    ...createStockRoutes(),
+    ...createRefillRoutes(),
+  ]
+}
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [{ path: '/', component: EmptyRoute, meta: { title: 'Vue Router POC' } }, ...stockRoutes, ...refillRoutes],
+  routes: buildRoutes(),
 })
 ```
 
@@ -96,12 +109,14 @@ Route components can remain lazy-loaded by their route records. A future module 
 
 Adding a route to a module means editing that module's routes; the root router only needs a change when registering a new module.
 
+A module must not link to another module's routes, by path or by route name, because those routes do not exist when it is served alone. Navigation between modules belongs to the app shell and only exists when several modules are deployed together.
+
 ## Adding a new module
 
 1. Create `src/modules/<new-module>/` with only the folders it needs.
 2. Add its routes and guards under `src/modules/<new-module>/router/`.
 3. Export the module's supported app-level surface from `src/modules/<new-module>/index.ts`.
-4. Import that public export and aggregate its routes in `src/router/index.ts`.
+4. Import that public export and aggregate its routes in `src/router/index.ts`, with a standalone branch in `buildRoutes`, and add the module name to `env.d.ts`.
 5. Apply the dependency and promotion rules: no imports from other modules; reusable code belongs in `shared/`.
 
 ## Imports
@@ -115,6 +130,6 @@ Adding a route to a module means editing that module's routes; the root router o
 
 - `src/modules/stock/router/stock-id-guard.ts` (`assertStockIdAllowed`) is stock-only, so it sits next to `src/modules/stock/router/routes.ts`. `StockDetails.vue`, which also uses it, imports it relatively (`../router/stock-id-guard`).
 - `src/shared/composables/useNavigationError.ts` records navigation errors (`router.onError` + `afterEach`). It lives in `shared/` because two consumers need it: `StockLayout.vue` (stock module) and `App.vue` (app shell, which shows the error when a direct load of `/stock/404` fails before any layout is mounted). It started in stock and was promoted when `App.vue` needed it.
-- `src/modules/stock/views/` holds `Stock*.vue`, and `src/modules/refill/views/` holds `Refill*.vue`; their routes are `stockRoutes` and `refillRoutes`, exposed through their module entries and aggregated by `src/router/index.ts`.
+- `src/modules/stock/views/` holds `Stock*.vue`, and `src/modules/refill/views/` holds `Refill*.vue`; their routes are built by `createStockRoutes` and `createRefillRoutes`, exposed through their module entries and aggregated by `src/router/index.ts`.
 - A future stock inventory workflow can live under `src/modules/stock/inventory/`; it does not become a root-level module merely because it has multiple steps.
 - `src/stores/counter.ts` is demo code unrelated to a module. Leave it, or move it to `shared/stores/` only if multiple modules use it.
