@@ -4,6 +4,7 @@
   "env": {
     "browser": true
   },
+  "ignorePatterns": [".history/**"],
   "categories": {
     "correctness": "error"
   }
